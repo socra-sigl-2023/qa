@@ -1,11 +1,11 @@
 # QA workshop
 
-This workshop is made for EPITA SIGL 2023 students of ARLA course.
+This workshop is made for EPITA SIGL 2023 students of SOCRA course.
 
 You will learn how to:
 
 - implement unit test in Node using [Jest](https://jestjs.io)
-- implement basic fonctional in Node test using [Cucumber](https://cucumber.io)
+- implement basic fonctional in Node test using supertest and axios
 - implement e2e test in Node using [Cypress.io](https://cypress.io)
 - create a pre-production (or CI for Continuous Integration) environment
 - integrate tests to your CD pipeline
