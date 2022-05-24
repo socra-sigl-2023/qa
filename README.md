@@ -811,7 +811,7 @@ Credentials for both databases are:
   - host: ci.postgres.socra-sigl.fr
   - port: 5432
 - Create the two views on your `socra-group-XX` database:
-  - `product_on_discounts`:
+  - `product_on_discount`:
   ```sql
    SELECT product.id,
     product.name,
