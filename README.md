@@ -351,7 +351,7 @@ If you see this logs, it means you've correctly set Jest.
 
 ### Create unit test for `distance`
 
-Let's first create a simple unit test to check the expected behaviour of the `extractPageOption` fuction.
+Let's first create a simple unit test to check the expected behaviour of the `distance` fuction.
 
 Create a new file `backend/src/distance.spec.js` with:
 
@@ -360,10 +360,14 @@ const { distance } = require("./distance");
 
 describe("distance", function () {
   test("should correctly compute distance between two GPS coordinates", () => {
-    const validQuery = { page: "1", limit: "10" };
-    const { page, limit } = extractPageOptions(validQuery);
-    expect(page).toEqual(1);
-    expect(limit).toEqual(10);
+    // Brandenburg Tor in Berlin
+    const berlin = {latitude: 52.516228, longitude: 13.377005}
+    // Eiffel tower in Paris
+    const paris = {latitude: 48.858370, longitude: 2.294481}
+    // The expected distance between Paris and Berlin in km
+    const expectedDistance = 879;
+    const computedDistance = distance(berlin, paris);
+    expect(computedDistance).toEqual(expectedDistance);
   });
 });
 ```
