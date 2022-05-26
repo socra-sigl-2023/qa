@@ -786,7 +786,7 @@ Save your changes.
 We created for you 2 different instances of Postgresql:
 
 1. ci.postgres.socra-sigl.fr: your CI (for Continuous Integration) instance of Postgres
-2. pro.postgresq.socra-sigl.fr: your production (pro) instance of Postgres
+2. pro.postgres.socra-sigl.fr: your production (pro) instance of Postgres
 
 And 2 different instances of MongoDB:
 
@@ -989,7 +989,7 @@ jobs:
     - make sure `docker run` runs the correct image (ci-socrate-web-api)
 
 - From your github repository, go to Settings > Secrets and add the follwing secrets values (replace XX by your group number):
-  - CI_RDB_HOST: ci.postgresql.socra-sigl.fr
+  - CI_RDB_HOST: ci.postgres.socra-sigl.fr
   - CI_RDB_PORT: 5432
   - CI_RDB_DATABASE: socra-group-XX 
   - CI_RDB_PASSWORD: socra-group-XX 
@@ -1042,7 +1042,27 @@ Some help:
 - use [`needs`](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idneeds) from github workflow to create dependencies between jobs
 - use [`actions/setup-node@v3`](https://github.com/actions/setup-node) github action to run backend unit and API tests
   - with node version 16
-  - simply run `npm test`
+  - Your github action runner **doesn't have access to ci.postgres.socra-sigl.fr** and needs it to run `npm test`.
+    - You will use an SSH Tunnel before running `npm test`
+    - Please use the following `run` code:
+    ```yml
+        run: |
+          mkdir ~/.ssh
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          eval `ssh-agent -s`
+          ssh-add - <<< "${{ secrets.SSH_KEY }}"
+          ssh -fN -v -L 5432:${{ secrets.CI_RDB_HOST }}:5432 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          npm ci
+          RDB_HOST=localhost npm test -- --verbose=true --forceExit
+    ```
+    > Some explanations:
+    >   - `ssh ... -L ...` command allows you to create an SSH tunnel:
+    >     - when you connect to localhost:5432 
+    >     - then you will connect first to sigl@groupXX.socra-sigl.fr
+    >     - and connect to ci.postgres.socra-sigl.fr:5432
+    >  - `RDB_HOST=localhost npm test` will run the test using `localhost` as postgres host **only** for the test run
+    >  - `--verbose=true and --forceExit` are Jest options
+    >  - `--forceExit` kills all processes when your spec is over. Without `--forceExit` your test using `supertest` may hang forever, blocking your CI...
 - use [`cypress-io/github-action@v2`](https://github.com/cypress-io/github-action) to run e2e/
   - with `working-directory` to `e2e/`
   - with config's `baseUrl` to `https://ci.groupXX.socra-sigl.fr` (replace XX by your group number)
